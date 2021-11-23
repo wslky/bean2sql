@@ -16,10 +16,16 @@ import java.util.List;
 public class GenerateSQL {
 
     /**
-     * 结果
+     *  每一张表的sql语句
      */
     private List<List<String>> list;
+    /**
+     * SQL文件的名字
+     */
     private List<String> name;
+    /**
+     * 获取表信息的对象
+     */
     private LoaderDef loaderDef;
 
     public List<String> getName() {
@@ -32,9 +38,12 @@ public class GenerateSQL {
 
     /**
      * 拿到生成的sql
-     * @return
+     * @return 所有sql语句
      */
     public List<List<String>> getSQLList(){
+        /**
+         * 获取指定包下所有@Table标注的类,并生成表信息
+         */
         List<TableDef> tableDefs = loaderDef.getTableDefs();
         if (tableDefs != null && tableDefs.size() > 0){
             list = new ArrayList<>();
@@ -68,6 +77,16 @@ public class GenerateSQL {
             sb.append("\t");
             sb.append("varchar");
             sb.append("("+"255"+")");
+            /**
+             * 优化:
+             *  1.判断是否是主键  √
+             *  2.类型映射:基本类型映射 + 日期映射  + BigDecimal映射
+             *  3.定义约束信息
+             */
+            if (columnDef.isQKey()){
+                sb.append("\t");
+                sb.append("primary key");
+            }
             if (i != columnDefs.size() - 1){
                 sb.append(',');
             }

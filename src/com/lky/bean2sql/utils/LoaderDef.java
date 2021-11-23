@@ -20,11 +20,29 @@ import java.util.Stack;
  * @Date 2021-11-14 15:25
  */
 public class LoaderDef {
+    /**
+     * projectPath:工程地址
+     */
     private String projectPath;
+    /**
+     * stack:遍历目录
+     */
     private Stack<String> stack;
+    /**
+     * clazzPath:指定包下的所有类
+     */
     private List<String> clazzPath;
+    /**
+     * fullClassNames:指定包下所有类的全类名
+     */
     private List<String> fullClassNames;
+    /**
+     * clazz:所有@Table标注的类
+     */
     private List<Class<?>> clazz;
+    /**
+     * tableDefs:需要创建的表的定义信息
+     */
     private List<TableDef> tableDefs;
 
     /**
@@ -43,7 +61,7 @@ public class LoaderDef {
     }
 
     /**
-     * 将所有当前包下所有class路径
+     * 获取当前包下的所有class对象的名字
      */
     private void getAllClassNames(){
         while (!stack.empty()){
@@ -94,8 +112,8 @@ public class LoaderDef {
 
     /**
      * 当前class文件的定义信息
-     * @param clazz
-     * @return TableDef 表定义信息
+     * @param clazz @Table标注的类
+     * @return TableDef @Table类中其他创建表的信息
      */
     private TableDef getTableDef(Class<?> clazz){
         TableDef tableDef = new TableDef();
@@ -118,7 +136,8 @@ public class LoaderDef {
                 columnDef.setName(fields[i].getName());
                 columnDef.setType(fields[i].getType().getName());
                 Annotation[] annotations = fields[i].getAnnotations();
-                if (annotations.length > 0){//有其他注解
+                //是否有其他注解
+                if (annotations.length > 0){
                     for (int j = 0; j < annotations.length; j++) {
                         if (annotations[j].annotationType().getName().equals(QKey.class.getName())){
                             columnDef.setQKey(true);
