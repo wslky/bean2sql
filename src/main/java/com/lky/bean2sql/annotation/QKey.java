@@ -9,4 +9,5 @@ import java.lang.annotation.*;
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
 public @interface QKey {
+
 }

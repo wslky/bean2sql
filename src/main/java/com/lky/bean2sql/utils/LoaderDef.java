@@ -6,6 +6,8 @@ import com.lky.bean2sql.annotation.QKey;
 import com.lky.bean2sql.annotation.QTable;
 import com.lky.bean2sql.definition.ColumnDef;
 import com.lky.bean2sql.definition.TableDef;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -20,6 +22,7 @@ import java.util.Stack;
  * @Date 2021-11-14 15:25
  */
 public class LoaderDef {
+    private Log log =  LogFactory.getLog(getClass());
     /**
      * projectPath:工程地址
      */
@@ -66,7 +69,8 @@ public class LoaderDef {
     private void getAllClassNames(){
         while (!stack.empty()){
             File file = new File(stack.pop());
-            if (!file.exists()){//路径非法退出
+            if (!file.exists()){
+                log.warn("路径非法,退出!");
                 return;
             }
             File[] files = file.listFiles((pathname) -> {
@@ -106,6 +110,7 @@ public class LoaderDef {
                 }
             }
         }catch (ClassNotFoundException e){
+            log.error("获取@Table出错!");
             e.printStackTrace();
         }
     }
@@ -136,7 +141,7 @@ public class LoaderDef {
                 columnDef.setName(fields[i].getName());
                 columnDef.setType(fields[i].getType().getName());
                 Annotation[] annotations = fields[i].getAnnotations();
-                //是否有其他注解
+                //是否标有注解
                 if (annotations.length > 0){
                     for (int j = 0; j < annotations.length; j++) {
                         if (annotations[j].annotationType().getName().equals(QKey.class.getName())){

@@ -1,7 +1,10 @@
 package com.lky.bean2sql.utils;
 
 import com.lky.bean2sql.definition.ColumnDef;
+import com.lky.bean2sql.definition.SQLType;
 import com.lky.bean2sql.definition.TableDef;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ import java.util.List;
  * @Date 2021-11-14 16:28
  */
 public class GenerateSQL {
-
+    private Log log =  LogFactory.getLog(getClass());
     /**
      *  每一张表的sql语句
      */
@@ -35,7 +38,6 @@ public class GenerateSQL {
     public GenerateSQL(String packageName) {
         this.loaderDef = new LoaderDef(packageName);
     }
-
     /**
      * 拿到生成的sql
      * @return 所有sql语句
@@ -57,14 +59,14 @@ public class GenerateSQL {
     }
 
     /**
-     * tableDef解析-->Sql
-     * v1.0只支持转为varchar类型
+     * TableDef解析
      * @param list
      * @param tableDef
      * @return
      */
     private List doSql(List list,TableDef tableDef){
         String tableName = tableDef.getName();
+        log.info("正在创建: "+tableName+"表...");
         name.add(tableName);
         StringBuilder sb = new StringBuilder();
         sb.append("create table if not exists `" + tableName + "` (");
@@ -72,29 +74,50 @@ public class GenerateSQL {
         List<ColumnDef> columnDefs = tableDef.getColumnDefs();
         for (int i = 0; i < columnDefs.size(); i++) {
             ColumnDef columnDef = columnDefs.get(i);
-            sb.append("\t");
+            sb.append('\t');
             sb.append("`"+columnDef.getName()+"`");
-            sb.append("\t");
-            sb.append("varchar");
-            sb.append("("+"255"+")");
+            sb.append('\t');
+            //类型
+            toSqlType(sb,columnDef.getType());
+            //是否主键
             /**
              * 优化:
              *  1.判断是否是主键  √
-             *  2.类型映射:基本类型映射 + 日期映射  + BigDecimal映射
+             *  2.类型映射:基本类型映射 + 日期映射  + BigDecimal映射  √
              *  3.定义约束信息
              */
-            if (columnDef.isQKey()){
-                sb.append("\t");
-                sb.append("primary key");
-            }
-            if (i != columnDefs.size() - 1){
-                sb.append(',');
-            }
-            sb.append("\n");
+            if (columnDef.isQKey()){ isKey(sb); }
+            sb.append(',');
+            sb.append('\n');
         }
+        int i = sb.lastIndexOf(",");
+        sb.deleteCharAt(i);
         sb.append(")");
         list.add(sb.toString());
+        log.info(tableName+"表创建成功!");
         return list;
+    }
+
+    /**
+     * 主键SQL
+     * @param sb
+     */
+    public void isKey(StringBuilder sb){
+        sb.append("\t");
+        sb.append("primary key");
+    }
+
+    /**
+     * 类型映射
+     * @param sb
+     * @param type
+     */
+    public void toSqlType(StringBuilder sb,String type){
+        if (SQLType.TYPES.containsKey(type)){
+            sb.append(SQLType.TYPES.get(type));
+        }else {
+            sb.append(SQLType.DEFAULT);
+        }
     }
 
     /**
@@ -104,7 +127,7 @@ public class GenerateSQL {
     private List initTemplate() {
         List list = new ArrayList<>();
         list.add("# @Author lky");
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         list.add("# 生成时间:" + simpleDateFormat.format(new Date()));
         list.add("# ------------------SQL-------------------");
         return list;

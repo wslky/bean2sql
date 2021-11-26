@@ -1,12 +1,37 @@
 # bean2sql
-java 实体类生成创建表
 
-程序入口:
+***通过注解方式将Java实体类,生成创建 Sql文件***
 
-public static void getFile(String packageName)
+#### 映射规则:
 
-输入指定的包名,扫描包下的所有需要创建的类.
-输出sql文件
+| JAVA类型   | 数据库类型 |
+| ---------- | ---------- |
+| int        | int        |
+| long       | bigint     |
+| float      | float      |
+| double     | double     |
+| Integer    | integer    |
+| char       | char       |
+| Date       | datetime   |
+| Timestamp  | timestamp  |
+| BigDecimal | decimal    |
+| Double     | double     |
+| boolean    | char       |
+| 其他       | varchar    |
+
+| 注解                                                 |
+| ---------------------------------------------------- |
+| @QTable(name):标注在需要创建表的类上(表名默认为类名) |
+| @QColumn(name):,指定列名(列名默认为属性名)           |
+| @QIgnore:忽略这个属性                                |
+| @QKey:主键                                           |
+
+```java
+/**
+*@param packageName "xx.xx.xx"
+*/
+OutputSQL.getFile(String name);//程序入口
+```
 
 
 
