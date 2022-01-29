@@ -15,6 +15,10 @@ import java.util.List;
  */
 public class OutputSQL {
     private static final Log log =  LogFactory.getLog(OutputSQL.class);
+
+    public static void main(String[] args) {
+        getFile("com.lky");
+    }
     /**
      * 入口
      * @param packageName "xx.xx.xx"全类名
